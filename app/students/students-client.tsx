@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import BottomSheet from "@/components/BottomSheet";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import Select from "@/components/Select";
 import type { ClassRow, StudentRow } from "@/lib/types";
 
@@ -45,6 +46,7 @@ export default function StudentsClient({
   const [form, setForm] = useState<FormState>(emptyForm(classes[0]?.classId ?? ""));
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<StudentRow | null>(null);
 
   function sortStudents(list: StudentRow[]) {
     return [...list].sort((a, b) => a.name.localeCompare(b.name, "vi"));
@@ -118,7 +120,6 @@ export default function StudentsClient({
   }
 
   async function handleDelete(studentId: string) {
-    if (!confirm("Xoá học sinh này? Không thể hoàn tác.")) return;
     setError(null);
     try {
       const res = await fetch(`/api/students/${studentId}`, { method: "DELETE" });
@@ -170,7 +171,7 @@ export default function StudentsClient({
                       <button onClick={() => openEdit(s)} className="text-gray-500 underline">
                         Sửa
                       </button>
-                      <button onClick={() => handleDelete(s.studentId)} className="text-red-500 underline">
+                      <button onClick={() => setDeleteTarget(s)} className="text-red-500 underline">
                         Xoá
                       </button>
                     </div>
@@ -250,6 +251,17 @@ export default function StudentsClient({
           </button>
         </form>
       </BottomSheet>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Xoá học sinh?"
+        description={deleteTarget ? `Xoá học sinh "${deleteTarget.name}"? Không thể hoàn tác.` : undefined}
+        onConfirm={() => {
+          if (deleteTarget) handleDelete(deleteTarget.studentId);
+          setDeleteTarget(null);
+        }}
+      />
     </div>
   );
 }

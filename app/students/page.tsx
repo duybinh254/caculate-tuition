@@ -11,7 +11,7 @@ export default async function StudentsPage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <NavBar title="Học sinh" />
+      <NavBar />
       <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-4 p-4 pb-24">
         {classes.length === 0 ? (
           <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">

@@ -3,6 +3,7 @@
 import { BookOpen, CalendarCheck, Home, LogOut, Users, Wallet } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { APP_NAME } from "@/lib/config";
 
 const LINKS = [
   { href: "/", label: "Tổng quan", icon: Home, ready: true },
@@ -12,7 +13,7 @@ const LINKS = [
   { href: "/billing", label: "Học phí", icon: Wallet, ready: true },
 ];
 
-export default function NavBar({ title }: { title: string }) {
+export default function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -25,7 +26,7 @@ export default function NavBar({ title }: { title: string }) {
   return (
     <>
       <header className="sticky top-0 z-20 flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3">
-        <h1 className="text-base font-semibold text-gray-900">{title}</h1>
+        <h1 className="text-base font-semibold text-gray-900">{APP_NAME}</h1>
         <button
           onClick={handleLogout}
           aria-label="Đăng xuất"

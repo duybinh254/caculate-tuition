@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { APP_NAME } from "@/lib/config";
 
 function LoginForm() {
   const router = useRouter();
@@ -38,7 +39,7 @@ function LoginForm() {
       onSubmit={handleSubmit}
       className="w-full max-w-sm rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
     >
-      <h1 className="mb-1 text-xl font-semibold">Tính học phí</h1>
+      <h1 className="mb-1 text-xl font-semibold">{APP_NAME}</h1>
       <p className="mb-6 text-sm text-gray-500">Nhập mật khẩu để tiếp tục</p>
 
       <input

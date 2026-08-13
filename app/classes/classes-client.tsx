@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import BottomSheet from "@/components/BottomSheet";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import { formatVnd } from "@/lib/format";
 import type { ClassRow } from "@/lib/types";
 
@@ -28,6 +29,7 @@ export default function ClassesClient({ initialClasses }: { initialClasses: Clas
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<ClassRow | null>(null);
 
   function openAdd() {
     setEditingId(null);
@@ -85,7 +87,6 @@ export default function ClassesClient({ initialClasses }: { initialClasses: Clas
   }
 
   async function handleDelete(classId: string) {
-    if (!confirm("Xoá lớp này? Không thể hoàn tác.")) return;
     setError(null);
     try {
       const res = await fetch(`/api/classes/${classId}`, { method: "DELETE" });
@@ -131,7 +132,7 @@ export default function ClassesClient({ initialClasses }: { initialClasses: Clas
                   <button onClick={() => openEdit(c)} className="mr-3 text-gray-500 underline">
                     Sửa
                   </button>
-                  <button onClick={() => handleDelete(c.classId)} className="text-red-500 underline">
+                  <button onClick={() => setDeleteTarget(c)} className="text-red-500 underline">
                     Xoá
                   </button>
                 </td>
@@ -196,6 +197,19 @@ export default function ClassesClient({ initialClasses }: { initialClasses: Clas
           </button>
         </form>
       </BottomSheet>
+
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Xoá lớp?"
+        description={
+          deleteTarget ? `Xoá lớp "${deleteTarget.className}"? Không thể hoàn tác.` : undefined
+        }
+        onConfirm={() => {
+          if (deleteTarget) handleDelete(deleteTarget.classId);
+          setDeleteTarget(null);
+        }}
+      />
     </div>
   );
 }

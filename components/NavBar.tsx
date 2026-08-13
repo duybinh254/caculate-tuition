@@ -7,7 +7,7 @@ const LINKS = [
   { href: "/", label: "Tổng quan", ready: true },
   { href: "/classes", label: "Lớp học", ready: true },
   { href: "/students", label: "Học sinh", ready: true },
-  { href: "/attendance", label: "Điểm danh", ready: false },
+  { href: "/attendance", label: "Điểm danh", ready: true },
   { href: "/billing", label: "Học phí", ready: false },
 ];
 

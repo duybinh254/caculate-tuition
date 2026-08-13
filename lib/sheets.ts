@@ -72,6 +72,19 @@ export async function updateRange(range: string, rows: (string | number)[][]) {
   });
 }
 
+/** Ghi đè nhiều vùng khác nhau trong 1 lần gọi API (tiết kiệm quota khi cập nhật nhiều dòng). */
+export async function batchUpdateRanges(updates: { range: string; values: (string | number)[][] }[]) {
+  if (updates.length === 0) return;
+  const sheets = getSheetsClient();
+  await sheets.spreadsheets.values.batchUpdate({
+    spreadsheetId: getSpreadsheetId(),
+    requestBody: {
+      valueInputOption: "USER_ENTERED",
+      data: updates.map((u) => ({ range: u.range, values: u.values })),
+    },
+  });
+}
+
 /** Xoá nội dung một vùng (không xoá dòng/cột, chỉ xoá giá trị) */
 export async function clearRange(range: string) {
   const sheets = getSheetsClient();

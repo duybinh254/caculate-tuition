@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import BottomSheet from "@/components/BottomSheet";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import MoneyInput from "@/components/MoneyInput";
 import { formatVnd } from "@/lib/format";
 import type { ClassRow } from "@/lib/types";
 
@@ -170,14 +171,11 @@ export default function ClassesClient({ initialClasses }: { initialClasses: Clas
           </label>
           <label className="flex flex-col gap-1 text-sm">
             Học phí/buổi (đ)
-            <input
+            <MoneyInput
               required
-              type="number"
-              min={0}
               value={form.feePerSession}
-              onChange={(e) => setForm({ ...form, feePerSession: e.target.value })}
-              className="rounded-lg border border-gray-300 px-3 py-2"
-              placeholder="100000"
+              onChange={(digits) => setForm({ ...form, feePerSession: digits })}
+              placeholder="100,000"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm">

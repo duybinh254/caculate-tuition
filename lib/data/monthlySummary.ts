@@ -34,6 +34,12 @@ export async function getMonthlySummary(month: string): Promise<MonthlySummaryRo
   return rows.filter((r) => r.month === month);
 }
 
+/** Các dòng học phí đã chốt của 1 lớp nhưng chưa đánh dấu "đã thu" — dùng để chặn xoá lớp. */
+export async function getUnpaidRowsForClass(classId: string): Promise<MonthlySummaryRow[]> {
+  const rows = await readAll();
+  return rows.filter((r) => r.classId === classId && !r.paid);
+}
+
 export interface FinalizeEntry {
   studentId: string;
   classId: string;

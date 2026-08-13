@@ -87,16 +87,13 @@ export default function ClassesClient({ initialClasses }: { initialClasses: Clas
     }
   }
 
+  // Không tự bắt lỗi ở đây — để ConfirmDialog nhận lỗi (nếu có) và giữ dialog mở
+  // hiện thông báo, thay vì đóng câm rồi lỗi bị modal che khuất.
   async function handleDelete(classId: string) {
-    setError(null);
-    try {
-      const res = await fetch(`/api/classes/${classId}`, { method: "DELETE" });
-      if (!res.ok) throw new Error(await parseError(res));
-      setClasses((prev) => prev.filter((c) => c.classId !== classId));
-      router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    }
+    const res = await fetch(`/api/classes/${classId}`, { method: "DELETE" });
+    if (!res.ok) throw new Error(await parseError(res));
+    setClasses((prev) => prev.filter((c) => c.classId !== classId));
+    router.refresh();
   }
 
   return (
@@ -198,15 +195,19 @@ export default function ClassesClient({ initialClasses }: { initialClasses: Clas
       </BottomSheet>
 
       <ConfirmDialog
+        key={deleteTarget?.classId ?? "closed"}
         open={deleteTarget !== null}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         title="Xoá lớp?"
         description={
-          deleteTarget ? `Xoá lớp "${deleteTarget.className}"? Không thể hoàn tác.` : undefined
+          deleteTarget
+            ? `Xoá lớp "${deleteTarget.className}" sẽ xoá luôn toàn bộ học sinh thuộc lớp này. Không thể hoàn tác. (Nếu lớp còn học phí chưa thu đủ, hệ thống sẽ chặn xoá.)`
+            : undefined
         }
         onConfirm={async () => {
-          if (deleteTarget) await handleDelete(deleteTarget.classId);
-          setDeleteTarget(null);
+          if (!deleteTarget) return;
+          await handleDelete(deleteTarget.classId); // throw ở đây thì dialog tự giữ mở + hiện lỗi
+          setDeleteTarget(null); // chỉ đóng khi xoá thành công
         }}
       />
     </div>

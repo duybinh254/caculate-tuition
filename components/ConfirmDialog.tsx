@@ -6,8 +6,12 @@ import { useState } from "react";
 
 /**
  * Modal xác nhận (thay cho window.confirm() mặc định của trình duyệt) — dùng cho các thao tác xoá.
- * `onConfirm` có thể là async — dialog tự hiện trạng thái đang xử lý (disable nút, xoay icon) và
- * chỉ đóng sau khi xong, để người dùng biết thao tác đang chạy thay vì cảm giác app đứng hình.
+ * `onConfirm` có thể là async và có thể throw để báo huỷ thao tác (vd. bị chặn do ràng buộc dữ liệu):
+ * dialog tự hiện trạng thái đang xử lý, và nếu onConfirm throw thì hiện lỗi ngay trong dialog,
+ * KHÔNG tự đóng — người dùng đọc được lý do trước khi đóng, thay vì đóng câm rồi lỗi ẩn phía sau.
+ *
+ * Lưu ý cho nơi gọi: truyền `key` gắn theo ID đối tượng đang chờ xoá (vd. `key={deleteTarget?.id}`)
+ * để React tự remount component mỗi lần đổi đối tượng — nhờ vậy state lỗi/loading cũ không dính lại.
  */
 export default function ConfirmDialog({
   open,
@@ -25,11 +29,15 @@ export default function ConfirmDialog({
   onConfirm: () => void | Promise<void>;
 }) {
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleConfirm() {
     setSubmitting(true);
+    setError(null);
     try {
-      await onConfirm();
+      await onConfirm(); // thành công thì bên gọi tự đóng dialog (đổi prop `open`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setSubmitting(false);
     }
@@ -46,6 +54,7 @@ export default function ConfirmDialog({
               {description}
             </AlertDialog.Description>
           )}
+          {error && <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
           <div className="mt-4 flex justify-end gap-2">
             <AlertDialog.Cancel
               disabled={submitting}
@@ -54,7 +63,7 @@ export default function ConfirmDialog({
               Huỷ
             </AlertDialog.Cancel>
             {/* Dùng button thường thay vì AlertDialog.Action: Action tự đóng dialog ngay khi
-                bấm, không đợi onConfirm (async) chạy xong — mất luôn trạng thái loading. */}
+                bấm, không đợi onConfirm (async) chạy xong — mất luôn trạng thái loading/lỗi. */}
             <button
               type="button"
               onClick={handleConfirm}

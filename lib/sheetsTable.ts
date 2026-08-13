@@ -1,4 +1,4 @@
-import { appendRows, deleteSheetRow, readRange, updateRange } from "./sheets";
+import { appendRows, deleteSheetRow, deleteSheetRows, readRange, updateRange } from "./sheets";
 
 /** Chuyển số cột (1-based) thành chữ cái cột kiểu Sheets: 1 -> A, 27 -> AA ... */
 function columnLetter(n: number): string {
@@ -51,6 +51,17 @@ export function sheetTable(sheetName: string, columnCount: number, idColumnIndex
       const rowIndex = await findRowIndex(id);
       if (rowIndex === -1) throw new Error(`Không tìm thấy bản ghi có ID "${id}"`);
       await deleteSheetRow(sheetName, rowIndex + 1); // +1 vì hàng 0 là tiêu đề
+    },
+
+    /** Xoá nhiều dòng theo danh sách ID trong 1 lần gọi API. Bỏ qua ID không tìm thấy. */
+    async deleteManyById(ids: string[]): Promise<void> {
+      if (ids.length === 0) return;
+      const idSet = new Set(ids);
+      const idCells = await readRange(`${sheetName}!${idCol}2:${idCol}`);
+      const rowIndices = idCells
+        .map((row, i) => (idSet.has(row[0]) ? i + 1 : -1)) // +1 vì hàng 0 là tiêu đề
+        .filter((i) => i !== -1);
+      await deleteSheetRows(sheetName, rowIndices);
     },
   };
 }

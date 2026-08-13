@@ -77,3 +77,11 @@ export async function updateStudent(studentId: string, input: StudentInput): Pro
 export async function deleteStudent(studentId: string): Promise<void> {
   await table.deleteById(studentId);
 }
+
+/** Xoá toàn bộ học sinh thuộc 1 lớp trong 1 lần gọi API. Trả về số học sinh đã xoá. */
+export async function deleteStudentsByClassId(classId: string): Promise<number> {
+  const students = await getStudents();
+  const ids = students.filter((s) => s.classId === classId).map((s) => s.studentId);
+  await table.deleteManyById(ids);
+  return ids.length;
+}

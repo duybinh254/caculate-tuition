@@ -119,16 +119,13 @@ export default function StudentsClient({
     }
   }
 
+  // Không tự bắt lỗi ở đây — để ConfirmDialog nhận lỗi (nếu có) và giữ dialog mở
+  // hiện thông báo, thay vì đóng câm rồi lỗi bị modal che khuất.
   async function handleDelete(studentId: string) {
-    setError(null);
-    try {
-      const res = await fetch(`/api/students/${studentId}`, { method: "DELETE" });
-      if (!res.ok) throw new Error(await parseError(res));
-      setStudents((prev) => prev.filter((s) => s.studentId !== studentId));
-      router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    }
+    const res = await fetch(`/api/students/${studentId}`, { method: "DELETE" });
+    if (!res.ok) throw new Error(await parseError(res));
+    setStudents((prev) => prev.filter((s) => s.studentId !== studentId));
+    router.refresh();
   }
 
   return (
@@ -254,13 +251,15 @@ export default function StudentsClient({
       </BottomSheet>
 
       <ConfirmDialog
+        key={deleteTarget?.studentId ?? "closed"}
         open={deleteTarget !== null}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         title="Xoá học sinh?"
         description={deleteTarget ? `Xoá học sinh "${deleteTarget.name}"? Không thể hoàn tác.` : undefined}
         onConfirm={async () => {
-          if (deleteTarget) await handleDelete(deleteTarget.studentId);
-          setDeleteTarget(null);
+          if (!deleteTarget) return;
+          await handleDelete(deleteTarget.studentId); // throw ở đây thì dialog tự giữ mở + hiện lỗi
+          setDeleteTarget(null); // chỉ đóng khi xoá thành công
         }}
       />
     </div>

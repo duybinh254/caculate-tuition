@@ -123,23 +123,28 @@ export async function getSheetIdByTitle(title: string): Promise<number> {
  * tính từ 0 trên toàn bộ tab (0 = dòng tiêu đề).
  */
 export async function deleteSheetRow(sheetTitle: string, rowIndex0Based: number) {
+  return deleteSheetRows(sheetTitle, [rowIndex0Based]);
+}
+
+/**
+ * Xoá nhiều dòng cùng lúc trong 1 lần gọi API (thay vì gọi xoá từng dòng riêng lẻ — chậm
+ * và tốn quota khi xoá cả loạt, ví dụ xoá hết học sinh của 1 lớp). Xoá từ dòng có chỉ số
+ * lớn xuống nhỏ trong cùng batch để các dòng chưa xoá không bị lệch chỉ số giữa các request.
+ */
+export async function deleteSheetRows(sheetTitle: string, rowIndices0Based: number[]) {
+  if (rowIndices0Based.length === 0) return;
   const sheets = getSheetsClient();
   const sheetId = await getSheetIdByTitle(sheetTitle);
+  const sortedDescending = [...rowIndices0Based].sort((a, b) => b - a);
+
   await sheets.spreadsheets.batchUpdate({
     spreadsheetId: getSpreadsheetId(),
     requestBody: {
-      requests: [
-        {
-          deleteDimension: {
-            range: {
-              sheetId,
-              dimension: "ROWS",
-              startIndex: rowIndex0Based,
-              endIndex: rowIndex0Based + 1,
-            },
-          },
+      requests: sortedDescending.map((idx) => ({
+        deleteDimension: {
+          range: { sheetId, dimension: "ROWS", startIndex: idx, endIndex: idx + 1 },
         },
-      ],
+      })),
     },
   });
 }

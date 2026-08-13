@@ -4,7 +4,7 @@ import type { StudentRow } from "@/lib/types";
 import { getClasses } from "./classes";
 
 const SHEET = "Students";
-const COLUMNS = ["studentId", "name", "classId", "parentPhone", "status"];
+const COLUMNS = ["studentId", "name", "classId", "studentPhone", "parentPhone", "status"];
 const table = sheetTable(SHEET, COLUMNS.length);
 
 function mapRow(cells: string[]): StudentRow {
@@ -12,14 +12,16 @@ function mapRow(cells: string[]): StudentRow {
     studentId: cells[0] ?? "",
     name: cells[1] ?? "",
     classId: cells[2] ?? "",
-    parentPhone: cells[3] ?? "",
-    status: cells[4] === "inactive" ? "inactive" : "active",
+    studentPhone: cells[3] ?? "",
+    parentPhone: cells[4] ?? "",
+    status: cells[5] === "inactive" ? "inactive" : "active",
   };
 }
 
 export interface StudentInput {
   name: string;
   classId: string;
+  studentPhone?: string;
   parentPhone?: string;
   status: "active" | "inactive";
 }
@@ -28,6 +30,7 @@ export async function validateStudentInput(body: unknown): Promise<StudentInput>
   const b = (body ?? {}) as Record<string, unknown>;
   const name = String(b.name ?? "").trim();
   const classId = String(b.classId ?? "").trim();
+  const studentPhone = typeof b.studentPhone === "string" ? b.studentPhone.trim() : "";
   const parentPhone = typeof b.parentPhone === "string" ? b.parentPhone.trim() : "";
   const status = b.status === "inactive" ? "inactive" : "active";
 
@@ -39,7 +42,7 @@ export async function validateStudentInput(body: unknown): Promise<StudentInput>
     throw new Error("Lớp đã chọn không tồn tại");
   }
 
-  return { name, classId, parentPhone, status };
+  return { name, classId, studentPhone, parentPhone, status };
 }
 
 export async function getStudents(): Promise<StudentRow[]> {
@@ -49,7 +52,14 @@ export async function getStudents(): Promise<StudentRow[]> {
 
 export async function createStudent(input: StudentInput): Promise<StudentRow> {
   const row: StudentRow = { studentId: generateId("s"), ...input };
-  await table.append([row.studentId, row.name, row.classId, row.parentPhone ?? "", row.status]);
+  await table.append([
+    row.studentId,
+    row.name,
+    row.classId,
+    row.studentPhone ?? "",
+    row.parentPhone ?? "",
+    row.status,
+  ]);
   return row;
 }
 
@@ -58,6 +68,7 @@ export async function updateStudent(studentId: string, input: StudentInput): Pro
     studentId,
     input.name,
     input.classId,
+    input.studentPhone ?? "",
     input.parentPhone ?? "",
     input.status,
   ]);

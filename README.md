@@ -38,8 +38,8 @@ Web app cá nhân để quản lý lớp học, học sinh, điểm danh và tí
    |---|---|---|---|
 
    **Students**
-   | studentId | name | classId | parentPhone | status |
-   |---|---|---|---|---|
+   | studentId | name | classId | studentPhone | parentPhone | status |
+   |---|---|---|---|---|---|
 
    **Attendance**
    | date | classId | studentId | present |

@@ -7,12 +7,13 @@ import type { ClassRow, StudentRow } from "@/lib/types";
 interface FormState {
   name: string;
   classId: string;
+  studentPhone: string;
   parentPhone: string;
   status: "active" | "inactive";
 }
 
 function emptyForm(defaultClassId: string): FormState {
-  return { name: "", classId: defaultClassId, parentPhone: "", status: "active" };
+  return { name: "", classId: defaultClassId, studentPhone: "", parentPhone: "", status: "active" };
 }
 
 async function parseError(res: Response): Promise<string> {
@@ -67,6 +68,7 @@ export default function StudentsClient({
     setEditForm({
       name: s.name,
       classId: s.classId,
+      studentPhone: s.studentPhone ?? "",
       parentPhone: s.parentPhone ?? "",
       status: s.status,
     });
@@ -143,6 +145,14 @@ export default function StudentsClient({
           </select>
         </label>
         <label className="flex flex-col gap-1 text-sm">
+          SĐT học sinh
+          <input
+            value={form.studentPhone}
+            onChange={(e) => setForm({ ...form, studentPhone: e.target.value })}
+            className="rounded-lg border border-gray-300 px-3 py-1.5"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
           SĐT phụ huynh
           <input
             value={form.parentPhone}
@@ -165,6 +175,7 @@ export default function StudentsClient({
             <tr>
               <th className="px-4 py-2 font-medium">Tên học sinh</th>
               <th className="px-4 py-2 font-medium">Lớp</th>
+              <th className="px-4 py-2 font-medium">SĐT học sinh</th>
               <th className="px-4 py-2 font-medium">SĐT phụ huynh</th>
               <th className="px-4 py-2 font-medium">Trạng thái</th>
               <th className="px-4 py-2 font-medium" />
@@ -173,7 +184,7 @@ export default function StudentsClient({
           <tbody>
             {students.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-gray-400">
+                <td colSpan={6} className="px-4 py-6 text-center text-gray-400">
                   Chưa có học sinh nào
                 </td>
               </tr>
@@ -200,6 +211,13 @@ export default function StudentsClient({
                         </option>
                       ))}
                     </select>
+                  </td>
+                  <td className="px-4 py-2">
+                    <input
+                      value={editForm.studentPhone}
+                      onChange={(e) => setEditForm({ ...editForm, studentPhone: e.target.value })}
+                      className="w-full rounded border border-gray-300 px-2 py-1"
+                    />
                   </td>
                   <td className="px-4 py-2">
                     <input
@@ -237,6 +255,7 @@ export default function StudentsClient({
                 <tr key={s.studentId} className="border-t border-gray-100">
                   <td className="px-4 py-2">{s.name}</td>
                   <td className="px-4 py-2">{classNameById.get(s.classId) ?? "—"}</td>
+                  <td className="px-4 py-2 text-gray-500">{s.studentPhone}</td>
                   <td className="px-4 py-2 text-gray-500">{s.parentPhone}</td>
                   <td className="px-4 py-2">
                     {s.status === "active" ? (

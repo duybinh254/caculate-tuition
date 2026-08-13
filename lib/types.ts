@@ -12,6 +12,7 @@ export interface StudentRow {
   studentId: string;
   name: string;
   classId: string;
+  studentPhone?: string;
   parentPhone?: string;
   status: "active" | "inactive";
 }

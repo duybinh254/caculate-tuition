@@ -80,3 +80,44 @@ export async function clearRange(range: string) {
     range,
   });
 }
+
+/** Tìm sheetId (gid) nội bộ của Google từ tên tab, cần cho việc xoá hẳn 1 dòng */
+export async function getSheetIdByTitle(title: string): Promise<number> {
+  const sheets = getSheetsClient();
+  const res = await sheets.spreadsheets.get({
+    spreadsheetId: getSpreadsheetId(),
+    fields: "sheets.properties",
+  });
+  const match = res.data.sheets?.find((s) => s.properties?.title === title);
+  const sheetId = match?.properties?.sheetId;
+  if (sheetId === undefined || sheetId === null) {
+    throw new Error(`Không tìm thấy tab "${title}" trong Google Sheet`);
+  }
+  return sheetId;
+}
+
+/**
+ * Xoá hẳn 1 dòng khỏi sheet (dịch các dòng bên dưới lên), theo chỉ số dòng
+ * tính từ 0 trên toàn bộ tab (0 = dòng tiêu đề).
+ */
+export async function deleteSheetRow(sheetTitle: string, rowIndex0Based: number) {
+  const sheets = getSheetsClient();
+  const sheetId = await getSheetIdByTitle(sheetTitle);
+  await sheets.spreadsheets.batchUpdate({
+    spreadsheetId: getSpreadsheetId(),
+    requestBody: {
+      requests: [
+        {
+          deleteDimension: {
+            range: {
+              sheetId,
+              dimension: "ROWS",
+              startIndex: rowIndex0Based,
+              endIndex: rowIndex0Based + 1,
+            },
+          },
+        },
+      ],
+    },
+  });
+}

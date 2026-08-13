@@ -84,7 +84,12 @@ export async function computeBilling(month: string): Promise<BillingRow[]> {
     }
   }
 
-  return rows.sort((a, b) => a.studentName.localeCompare(b.studentName, "vi"));
+  return rows
+    // Ẩn học sinh chưa chốt mà 0 buổi trong tháng (vd. lớp/học sinh chưa tồn tại ở tháng đó,
+    // hoặc chỉ đơn giản là chưa điểm danh buổi nào) — tránh hiện dòng 0đ gây hiểu lầm.
+    // Dòng đã chốt thì luôn giữ lại để không mất dữ liệu đã lưu.
+    .filter((r) => r.finalized || r.sessionCount > 0)
+    .sort((a, b) => a.studentName.localeCompare(b.studentName, "vi"));
 }
 
 /** Chốt học phí tháng: lưu snapshot cho các học sinh chưa chốt (giữ nguyên dòng đã chốt trước đó). */

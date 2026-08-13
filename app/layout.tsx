@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { APP_NAME } from "@/lib/config";
 import "./globals.css";
@@ -16,6 +16,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: APP_NAME,
   description: "Quản lý lớp học, học sinh và tính học phí theo tháng",
+};
+
+// Giao diện hiện chỉ thiết kế theme sáng — khai báo colorScheme để trình duyệt
+// (đặc biệt Android Chrome ở chế độ tối) không tự "đảo màu" trang, gây chữ mờ/lem.
+export const viewport: Viewport = {
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

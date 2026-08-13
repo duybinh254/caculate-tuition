@@ -4,7 +4,13 @@ import { Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import BottomSheet from "@/components/BottomSheet";
+import Select from "@/components/Select";
 import type { ClassRow, StudentRow } from "@/lib/types";
+
+const STATUS_OPTIONS = [
+  { value: "active", label: "Đang học" },
+  { value: "inactive", label: "Nghỉ học" },
+];
 
 interface FormState {
   name: string;
@@ -203,18 +209,11 @@ export default function StudentsClient({
           </label>
           <label className="flex flex-col gap-1 text-sm">
             Lớp
-            <select
-              required
+            <Select
               value={form.classId}
-              onChange={(e) => setForm({ ...form, classId: e.target.value })}
-              className="rounded-lg border border-gray-300 px-3 py-2"
-            >
-              {classes.map((c) => (
-                <option key={c.classId} value={c.classId}>
-                  {c.className}
-                </option>
-              ))}
-            </select>
+              onValueChange={(v) => setForm({ ...form, classId: v })}
+              options={classes.map((c) => ({ value: c.classId, label: c.className }))}
+            />
           </label>
           <label className="flex flex-col gap-1 text-sm">
             SĐT học sinh
@@ -235,14 +234,11 @@ export default function StudentsClient({
           {editingId && (
             <label className="flex flex-col gap-1 text-sm">
               Trạng thái
-              <select
+              <Select
                 value={form.status}
-                onChange={(e) => setForm({ ...form, status: e.target.value as "active" | "inactive" })}
-                className="rounded-lg border border-gray-300 px-3 py-2"
-              >
-                <option value="active">Đang học</option>
-                <option value="inactive">Nghỉ học</option>
-              </select>
+                onValueChange={(v) => setForm({ ...form, status: v as "active" | "inactive" })}
+                options={STATUS_OPTIONS}
+              />
             </label>
           )}
           <button

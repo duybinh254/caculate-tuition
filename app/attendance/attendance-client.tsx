@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Select from "@/components/Select";
 import { todayLocalDate } from "@/lib/date";
 import type { ClassRow, StudentRow } from "@/lib/types";
 
@@ -124,19 +125,13 @@ export default function AttendanceClient({
       )}
 
       <div className="flex flex-wrap items-end gap-3 rounded-xl border border-gray-200 bg-white p-4">
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="flex flex-1 min-w-40 flex-col gap-1 text-sm">
           Lớp
-          <select
+          <Select
             value={classId}
-            onChange={(e) => handleClassChange(e.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-1.5"
-          >
-            {classes.map((c) => (
-              <option key={c.classId} value={c.classId}>
-                {c.className}
-              </option>
-            ))}
-          </select>
+            onValueChange={handleClassChange}
+            options={classes.map((c) => ({ value: c.classId, label: c.className }))}
+          />
         </label>
         <label className="flex flex-col gap-1 text-sm">
           Ngày học

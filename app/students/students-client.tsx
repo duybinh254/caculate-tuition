@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import BottomSheet from "@/components/BottomSheet";
 import type { ClassRow, StudentRow } from "@/lib/types";
@@ -43,6 +43,20 @@ export default function StudentsClient({
   function sortStudents(list: StudentRow[]) {
     return [...list].sort((a, b) => a.name.localeCompare(b.name, "vi"));
   }
+
+  const groups = useMemo(() => {
+    const byClass = new Map<string, { classId: string; className: string; students: StudentRow[] }>();
+    for (const s of students) {
+      const className = classNameById.get(s.classId) ?? "Chưa rõ lớp";
+      if (!byClass.has(s.classId)) {
+        byClass.set(s.classId, { classId: s.classId, className, students: [] });
+      }
+      byClass.get(s.classId)!.students.push(s);
+    }
+    return [...byClass.values()].sort((a, b) => a.className.localeCompare(b.className, "vi"));
+    // classNameById được tạo lại mỗi render từ `classes`, nên dùng classes làm dep thay vì map.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [students, classes]);
 
   function openAdd() {
     setEditingId(null);
@@ -116,41 +130,51 @@ export default function StudentsClient({
         <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
       )}
 
-      <div className="flex flex-col gap-2">
-        {students.length === 0 && (
-          <p className="rounded-xl border border-gray-200 bg-white px-4 py-6 text-center text-sm text-gray-400">
-            Chưa có học sinh nào
-          </p>
-        )}
-        {students.map((s) => (
-          <div key={s.studentId} className="rounded-xl border border-gray-200 bg-white p-3">
-            <div className="flex items-center justify-between">
-              <span className="font-medium">{s.name}</span>
-              {s.status === "active" ? (
-                <span className="text-xs text-green-600">Đang học</span>
-              ) : (
-                <span className="text-xs text-gray-400">Nghỉ học</span>
-              )}
-            </div>
-            <div className="mt-0.5 text-sm text-gray-500">{classNameById.get(s.classId) ?? "—"}</div>
-            {(s.studentPhone || s.parentPhone) && (
-              <div className="mt-1 text-xs text-gray-400">
-                {s.studentPhone && <span>HS: {s.studentPhone}</span>}
-                {s.studentPhone && s.parentPhone && <span> · </span>}
-                {s.parentPhone && <span>PH: {s.parentPhone}</span>}
+      {students.length === 0 ? (
+        <p className="rounded-xl border border-gray-200 bg-white px-4 py-6 text-center text-sm text-gray-400">
+          Chưa có học sinh nào
+        </p>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {groups.map((group) => (
+            <div key={group.classId}>
+              <div className="mb-2 flex items-baseline justify-between px-1">
+                <h3 className="text-sm font-semibold text-gray-700">{group.className}</h3>
+                <span className="text-xs text-gray-400">{group.students.length} học sinh</span>
               </div>
-            )}
-            <div className="mt-2 flex justify-end gap-3 border-t border-gray-100 pt-2 text-sm">
-              <button onClick={() => openEdit(s)} className="text-gray-500 underline">
-                Sửa
-              </button>
-              <button onClick={() => handleDelete(s.studentId)} className="text-red-500 underline">
-                Xoá
-              </button>
+              <div className="flex flex-col gap-2">
+                {group.students.map((s) => (
+                  <div key={s.studentId} className="rounded-xl border border-gray-200 bg-white p-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">{s.name}</span>
+                      {s.status === "active" ? (
+                        <span className="text-xs text-green-600">Đang học</span>
+                      ) : (
+                        <span className="text-xs text-gray-400">Nghỉ học</span>
+                      )}
+                    </div>
+                    {(s.studentPhone || s.parentPhone) && (
+                      <div className="mt-1 text-xs text-gray-400">
+                        {s.studentPhone && <span>HS: {s.studentPhone}</span>}
+                        {s.studentPhone && s.parentPhone && <span> · </span>}
+                        {s.parentPhone && <span>PH: {s.parentPhone}</span>}
+                      </div>
+                    )}
+                    <div className="mt-2 flex justify-end gap-3 border-t border-gray-100 pt-2 text-sm">
+                      <button onClick={() => openEdit(s)} className="text-gray-500 underline">
+                        Sửa
+                      </button>
+                      <button onClick={() => handleDelete(s.studentId)} className="text-red-500 underline">
+                        Xoá
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       <button
         onClick={openAdd}

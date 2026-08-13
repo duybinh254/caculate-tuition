@@ -40,6 +40,12 @@ export async function getUnpaidRowsForClass(classId: string): Promise<MonthlySum
   return rows.filter((r) => r.classId === classId && !r.paid);
 }
 
+/** Các dòng học phí đã chốt của 1 học sinh nhưng chưa đánh dấu "đã thu" — dùng để chặn xoá học sinh. */
+export async function getUnpaidRowsForStudent(studentId: string): Promise<MonthlySummaryRow[]> {
+  const rows = await readAll();
+  return rows.filter((r) => r.studentId === studentId && !r.paid);
+}
+
 export interface FinalizeEntry {
   studentId: string;
   classId: string;

@@ -8,7 +8,7 @@ const LINKS = [
   { href: "/classes", label: "Lớp học", ready: true },
   { href: "/students", label: "Học sinh", ready: true },
   { href: "/attendance", label: "Điểm danh", ready: true },
-  { href: "/billing", label: "Học phí", ready: false },
+  { href: "/billing", label: "Học phí", ready: true },
 ];
 
 export default function NavBar() {

@@ -82,6 +82,22 @@ export async function countPresentSessions(
   ).length;
 }
 
+/**
+ * Đếm số buổi có mặt của TẤT CẢ học sinh trong 1 tháng (YYYY-MM), chỉ 1 lần đọc Sheet
+ * thay vì đọc lại cho từng học sinh. Trả về map khoá `${classId}|${studentId}` -> số buổi.
+ */
+export async function getPresentCountsForMonth(month: string): Promise<Record<string, number>> {
+  const rows = await readAll();
+  const counts: Record<string, number> = {};
+  for (const r of rows) {
+    if (r.present && r.date.startsWith(month)) {
+      const key = `${r.classId}|${r.studentId}`;
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
+  }
+  return counts;
+}
+
 /** Lưu điểm danh cho 1 lớp/1 ngày: cập nhật dòng đã có, thêm mới dòng chưa có. */
 export async function saveAttendance(input: AttendanceInput): Promise<void> {
   const { classId, date, entries } = input;

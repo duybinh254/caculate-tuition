@@ -6,3 +6,8 @@ export function todayLocalDate(): string {
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
 }
+
+/** Tháng hiện tại theo giờ địa phương, định dạng YYYY-MM. */
+export function currentLocalMonth(): string {
+  return todayLocalDate().slice(0, 7);
+}

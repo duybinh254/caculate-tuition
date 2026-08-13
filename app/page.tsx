@@ -19,10 +19,10 @@ export default async function Home() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <NavBar />
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-6">
+      <NavBar title="Tổng quan" />
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-4 pb-24">
         <section className="rounded-xl border border-gray-200 bg-white p-5">
-          <h1 className="mb-1 font-medium">Tổng quan — {formatMonthLabel(month)}</h1>
+          <h2 className="mb-1 font-medium">{formatMonthLabel(month)}</h2>
           <p className="text-sm text-gray-500">
             Quản lý lớp học, học sinh, điểm danh và tính học phí theo tháng.
           </p>

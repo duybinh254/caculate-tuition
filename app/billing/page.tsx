@@ -12,9 +12,8 @@ export default async function BillingPage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <NavBar />
-      <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 p-6">
-        <h1 className="text-xl font-semibold">Học phí theo tháng</h1>
+      <NavBar title="Học phí" />
+      <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-4 p-4 pb-24">
         <BillingClient initialMonth={month} initialRows={rows} />
       </main>
     </div>

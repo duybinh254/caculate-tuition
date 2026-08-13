@@ -10,9 +10,8 @@ export default async function ClassesPage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <NavBar />
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-6">
-        <h1 className="text-xl font-semibold">Lớp học</h1>
+      <NavBar title="Lớp học" />
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 p-4 pb-24">
         <ClassesClient initialClasses={classes} />
       </main>
     </div>

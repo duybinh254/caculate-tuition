@@ -11,9 +11,8 @@ export default async function AttendancePage() {
 
   return (
     <div className="flex flex-1 flex-col">
-      <NavBar />
-      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-6">
-        <h1 className="text-xl font-semibold">Điểm danh</h1>
+      <NavBar title="Điểm danh" />
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 p-4 pb-24">
         {classes.length === 0 ? (
           <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
             Chưa có lớp nào — vào trang <a className="underline" href="/classes">Lớp học</a> để tạo lớp

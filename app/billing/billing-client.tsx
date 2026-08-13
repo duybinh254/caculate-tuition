@@ -1,5 +1,6 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { formatVnd } from "@/lib/format";
 import type { BillingRow } from "@/lib/data/billing";
@@ -135,26 +136,30 @@ export default function BillingClient({
         <p className="rounded-lg bg-green-50 px-3 py-2 text-sm text-green-700">{savedMessage}</p>
       )}
 
-      <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl border border-gray-200 bg-white p-4">
+      <div className="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4">
         <label className="flex flex-col gap-1 text-sm">
-          Tháng
+          <span className="flex items-center gap-1.5">
+            Tháng
+            {loading && <Loader2 className="h-3.5 w-3.5 animate-spin text-gray-400" />}
+          </span>
           <input
             type="month"
             value={month}
             onChange={(e) => handleMonthChange(e.target.value)}
-            className="rounded-lg border border-gray-300 px-3 py-1.5"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2"
           />
         </label>
         <button
           onClick={handleFinalize}
           disabled={finalizing || loading || rows.length === 0 || allFinalized}
-          className="rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+          className="flex items-center justify-center gap-1.5 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
         >
+          {finalizing && <Loader2 className="h-4 w-4 animate-spin" />}
           {finalizing ? "Đang chốt..." : allFinalized ? "Đã chốt tháng này" : "Chốt học phí tháng"}
         </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className={`grid grid-cols-3 gap-3 transition-opacity ${loading ? "opacity-40" : ""}`}>
         <div className="rounded-xl border border-gray-200 bg-white p-4">
           <div className="text-xs text-gray-500">Tổng học phí</div>
           <div className="mt-1 text-lg font-semibold">{formatVnd(totalAmount)}</div>
@@ -174,7 +179,9 @@ export default function BillingClient({
           {loading ? "Đang tải..." : "Chưa có học sinh nào"}
         </p>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div
+          className={`flex flex-col gap-4 transition-opacity ${loading ? "pointer-events-none opacity-40" : ""}`}
+        >
           {groups.map((group) => {
             const subtotal = group.rows.reduce((sum, r) => sum + r.totalAmount, 0);
             return (

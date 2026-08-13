@@ -94,8 +94,16 @@ export async function clearRange(range: string) {
   });
 }
 
+// Cache sheetId (gid) theo tên tab trong bộ nhớ của tiến trình — tab không đổi tên/gid
+// trong lúc chạy, nên không cần gọi lại API mỗi lần xoá dòng (đỡ 1 round-trip mạng).
+// Trên serverless, cache này chỉ tồn tại trong 1 lambda "ấm" (warm), tự làm mới khi nguội.
+const sheetIdCache = new Map<string, number>();
+
 /** Tìm sheetId (gid) nội bộ của Google từ tên tab, cần cho việc xoá hẳn 1 dòng */
 export async function getSheetIdByTitle(title: string): Promise<number> {
+  const cached = sheetIdCache.get(title);
+  if (cached !== undefined) return cached;
+
   const sheets = getSheetsClient();
   const res = await sheets.spreadsheets.get({
     spreadsheetId: getSpreadsheetId(),
@@ -106,6 +114,7 @@ export async function getSheetIdByTitle(title: string): Promise<number> {
   if (sheetId === undefined || sheetId === null) {
     throw new Error(`Không tìm thấy tab "${title}" trong Google Sheet`);
   }
+  sheetIdCache.set(title, sheetId);
   return sheetId;
 }
 

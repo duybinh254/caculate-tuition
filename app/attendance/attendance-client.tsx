@@ -1,5 +1,6 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import Select from "@/components/Select";
 import { todayLocalDate } from "@/lib/date";
@@ -187,8 +188,9 @@ export default function AttendanceClient({
       <button
         onClick={handleSave}
         disabled={saving || loading || studentsInClass.length === 0}
-        className="self-start rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+        className="flex items-center justify-center gap-1.5 self-start rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
       >
+        {saving && <Loader2 className="h-4 w-4 animate-spin" />}
         {saving ? "Đang lưu..." : "Lưu điểm danh"}
       </button>
     </div>

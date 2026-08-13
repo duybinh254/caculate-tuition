@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import BottomSheet from "@/components/BottomSheet";
@@ -245,8 +245,9 @@ export default function StudentsClient({
           <button
             type="submit"
             disabled={submitting}
-            className="mt-2 rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+            className="mt-2 flex items-center justify-center gap-1.5 rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
           >
+            {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
             {submitting ? "Đang lưu..." : editingId ? "Lưu thay đổi" : "Thêm học sinh"}
           </button>
         </form>
@@ -257,8 +258,8 @@ export default function StudentsClient({
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         title="Xoá học sinh?"
         description={deleteTarget ? `Xoá học sinh "${deleteTarget.name}"? Không thể hoàn tác.` : undefined}
-        onConfirm={() => {
-          if (deleteTarget) handleDelete(deleteTarget.studentId);
+        onConfirm={async () => {
+          if (deleteTarget) await handleDelete(deleteTarget.studentId);
           setDeleteTarget(null);
         }}
       />

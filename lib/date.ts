@@ -11,3 +11,9 @@ export function todayLocalDate(): string {
 export function currentLocalMonth(): string {
   return todayLocalDate().slice(0, 7);
 }
+
+/** "2026-08" -> "Tháng 8/2026" */
+export function formatMonthLabel(month: string): string {
+  const [y, m] = month.split("-");
+  return `Tháng ${Number(m)}/${y}`;
+}

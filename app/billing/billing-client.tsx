@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { formatVnd } from "@/lib/format";
 import type { BillingRow } from "@/lib/data/billing";
 
@@ -169,69 +169,60 @@ export default function BillingClient({
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-left text-gray-500">
-            <tr>
-              <th className="px-4 py-2 font-medium">Học sinh</th>
-              <th className="px-4 py-2 font-medium">Số buổi</th>
-              <th className="px-4 py-2 font-medium">Đơn giá</th>
-              <th className="px-4 py-2 font-medium">Thành tiền</th>
-              <th className="px-4 py-2 font-medium">Trạng thái</th>
-              <th className="px-4 py-2 font-medium">Đã thu</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-gray-400">
-                  {loading ? "Đang tải..." : "Chưa có học sinh nào"}
-                </td>
-              </tr>
-            )}
-            {groups.map((group) => {
-              const subtotal = group.rows.reduce((sum, r) => sum + r.totalAmount, 0);
-              return (
-                <Fragment key={group.classId}>
-                  <tr className="border-t border-gray-200 bg-gray-50/60">
-                    <td colSpan={3} className="px-4 py-1.5 text-xs font-semibold text-gray-600">
-                      {group.className}
-                    </td>
-                    <td colSpan={3} className="px-4 py-1.5 text-right text-xs font-semibold text-gray-600">
-                      {group.rows.length} học sinh · {formatVnd(subtotal)}
-                    </td>
-                  </tr>
+      {rows.length === 0 ? (
+        <p className="rounded-xl border border-gray-200 bg-white px-4 py-6 text-center text-sm text-gray-400">
+          {loading ? "Đang tải..." : "Chưa có học sinh nào"}
+        </p>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {groups.map((group) => {
+            const subtotal = group.rows.reduce((sum, r) => sum + r.totalAmount, 0);
+            return (
+              <div key={group.classId}>
+                <div className="mb-2 flex items-baseline justify-between px-1">
+                  <h3 className="text-sm font-semibold text-gray-700">{group.className}</h3>
+                  <span className="text-xs text-gray-400">
+                    {group.rows.length} học sinh · {formatVnd(subtotal)}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-2">
                   {group.rows.map((r) => (
-                    <tr key={r.studentId} className="border-t border-gray-100">
-                      <td className="px-4 py-2">{r.studentName}</td>
-                      <td className="px-4 py-2">{r.sessionCount}</td>
-                      <td className="px-4 py-2">{formatVnd(r.feePerSession)}</td>
-                      <td className="px-4 py-2 font-medium">{formatVnd(r.totalAmount)}</td>
-                      <td className="px-4 py-2">
+                    <div key={r.studentId} className="rounded-xl border border-gray-200 bg-white p-3 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">{r.studentName}</span>
                         {r.finalized ? (
-                          <span className="text-gray-500">Đã chốt</span>
+                          <span className="text-xs text-gray-500">Đã chốt</span>
                         ) : (
-                          <span className="text-amber-600">Chưa chốt</span>
+                          <span className="text-xs text-amber-600">Chưa chốt</span>
                         )}
-                      </td>
-                      <td className="px-4 py-2">
+                      </div>
+                      <div className="mt-1 flex items-baseline justify-between text-gray-500">
+                        <span>
+                          {r.sessionCount} buổi × {formatVnd(r.feePerSession)}
+                        </span>
+                        <span className="text-base font-semibold text-gray-900">
+                          {formatVnd(r.totalAmount)}
+                        </span>
+                      </div>
+                      <label className="mt-2 flex items-center justify-between border-t border-gray-100 pt-2">
+                        <span className={r.finalized ? "text-gray-600" : "text-gray-300"}>Đã thu</span>
                         <input
                           type="checkbox"
                           checked={r.paid}
                           disabled={!r.finalized || updatingIds.has(r.studentId)}
                           onChange={() => handleTogglePaid(r)}
                           title={r.finalized ? undefined : "Chốt tháng trước khi đánh dấu đã thu"}
-                          className="h-4 w-4"
+                          className="h-5 w-5"
                         />
-                      </td>
-                    </tr>
+                      </label>
+                    </div>
                   ))}
-                </Fragment>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <p className="text-xs text-gray-400">
         Học sinh &quot;Chưa chốt&quot; đang hiển thị số liệu tạm tính từ điểm danh hiện tại. Bấm

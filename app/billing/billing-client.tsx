@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { formatVnd } from "@/lib/format";
 import type { BillingRow } from "@/lib/data/billing";
 
@@ -117,6 +117,17 @@ export default function BillingClient({
   const unpaidAmount = totalAmount - paidAmount;
   const allFinalized = rows.length > 0 && rows.every((r) => r.finalized);
 
+  const groups = useMemo(() => {
+    const byClass = new Map<string, { classId: string; className: string; rows: BillingRow[] }>();
+    for (const r of rows) {
+      if (!byClass.has(r.classId)) {
+        byClass.set(r.classId, { classId: r.classId, className: r.className, rows: [] });
+      }
+      byClass.get(r.classId)!.rows.push(r);
+    }
+    return [...byClass.values()].sort((a, b) => a.className.localeCompare(b.className, "vi"));
+  }, [rows]);
+
   return (
     <div className="flex flex-col gap-4">
       {error && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
@@ -163,7 +174,6 @@ export default function BillingClient({
           <thead className="bg-gray-50 text-left text-gray-500">
             <tr>
               <th className="px-4 py-2 font-medium">Học sinh</th>
-              <th className="px-4 py-2 font-medium">Lớp</th>
               <th className="px-4 py-2 font-medium">Số buổi</th>
               <th className="px-4 py-2 font-medium">Đơn giá</th>
               <th className="px-4 py-2 font-medium">Thành tiền</th>
@@ -174,37 +184,51 @@ export default function BillingClient({
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-6 text-center text-gray-400">
+                <td colSpan={6} className="px-4 py-6 text-center text-gray-400">
                   {loading ? "Đang tải..." : "Chưa có học sinh nào"}
                 </td>
               </tr>
             )}
-            {rows.map((r) => (
-              <tr key={r.studentId} className="border-t border-gray-100">
-                <td className="px-4 py-2">{r.studentName}</td>
-                <td className="px-4 py-2">{r.className}</td>
-                <td className="px-4 py-2">{r.sessionCount}</td>
-                <td className="px-4 py-2">{formatVnd(r.feePerSession)}</td>
-                <td className="px-4 py-2 font-medium">{formatVnd(r.totalAmount)}</td>
-                <td className="px-4 py-2">
-                  {r.finalized ? (
-                    <span className="text-gray-500">Đã chốt</span>
-                  ) : (
-                    <span className="text-amber-600">Chưa chốt</span>
-                  )}
-                </td>
-                <td className="px-4 py-2">
-                  <input
-                    type="checkbox"
-                    checked={r.paid}
-                    disabled={!r.finalized || updatingIds.has(r.studentId)}
-                    onChange={() => handleTogglePaid(r)}
-                    title={r.finalized ? undefined : "Chốt tháng trước khi đánh dấu đã thu"}
-                    className="h-4 w-4"
-                  />
-                </td>
-              </tr>
-            ))}
+            {groups.map((group) => {
+              const subtotal = group.rows.reduce((sum, r) => sum + r.totalAmount, 0);
+              return (
+                <Fragment key={group.classId}>
+                  <tr className="border-t border-gray-200 bg-gray-50/60">
+                    <td colSpan={3} className="px-4 py-1.5 text-xs font-semibold text-gray-600">
+                      {group.className}
+                    </td>
+                    <td colSpan={3} className="px-4 py-1.5 text-right text-xs font-semibold text-gray-600">
+                      {group.rows.length} học sinh · {formatVnd(subtotal)}
+                    </td>
+                  </tr>
+                  {group.rows.map((r) => (
+                    <tr key={r.studentId} className="border-t border-gray-100">
+                      <td className="px-4 py-2">{r.studentName}</td>
+                      <td className="px-4 py-2">{r.sessionCount}</td>
+                      <td className="px-4 py-2">{formatVnd(r.feePerSession)}</td>
+                      <td className="px-4 py-2 font-medium">{formatVnd(r.totalAmount)}</td>
+                      <td className="px-4 py-2">
+                        {r.finalized ? (
+                          <span className="text-gray-500">Đã chốt</span>
+                        ) : (
+                          <span className="text-amber-600">Chưa chốt</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2">
+                        <input
+                          type="checkbox"
+                          checked={r.paid}
+                          disabled={!r.finalized || updatingIds.has(r.studentId)}
+                          onChange={() => handleTogglePaid(r)}
+                          title={r.finalized ? undefined : "Chốt tháng trước khi đánh dấu đã thu"}
+                          className="h-4 w-4"
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </Fragment>
+              );
+            })}
           </tbody>
         </table>
       </div>
